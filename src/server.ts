@@ -13,6 +13,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cors());
 
+app.get("/", (req, res) => {
+    res.status(200).json({ message: "ok" });
+});
+
 app.get("/analytics/v1/:key/analytics.min.js", async (req, res) => {
     try {
         if (typeof req.query.userId !== "string") {
