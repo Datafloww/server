@@ -1,7 +1,6 @@
 # Based on https://raw.githubusercontent.com/github/gitignore/main/Node.gitignore
 
 # Logs
-/datafloww-api
 logs
 _.log
 npm-debug.log_
@@ -175,3 +174,4 @@ dist
 .DS_Store
 
 .vercel
+public/
