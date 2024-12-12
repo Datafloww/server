@@ -3,6 +3,7 @@ import cors from "cors";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateWriteKey } from "./handlers/redis.js";
+import { authRouter } from "./routes/auth.router.js";
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -16,6 +17,8 @@ app.use(cors());
 app.get("/", (req, res) => {
     res.status(200).json({ message: "ok" });
 });
+
+app.use("/auth", authRouter);
 
 app.get("/analytics/v1/:key/analytics.min.js", async (req, res) => {
     try {
@@ -45,7 +48,13 @@ app.get("/analytics/v1/:key/analytics.min.js", async (req, res) => {
 });
 
 app.get("/healthcheck", (req, res) => {
-    res.status(204).json({ message: "Server is running" });
+    const health = {
+        status: "healthy",
+        uptime: process.uptime(),
+        timestamp: Date.now(),
+    };
+
+    res.status(200).json(health);
 });
 
 app.use((err, req, res, next) => {
