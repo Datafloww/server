@@ -1,8 +1,11 @@
-import { Client, Account } from "node-appwrite";
+import * as sdk from "node-appwrite";
 import dotenv from "dotenv";
+
 dotenv.config();
-const client = new Client()
+
+const client = new sdk.Client()
     .setProject(process.env.APPWRITE_PROJECT_ID)
     .setKey(process.env.APPWRITE_API_KEY);
-const account = new Account(client);
-export default account;
+export const account = new sdk.Account(client);
+export const user = new sdk.Users(client);
+export const query = sdk.Query;
