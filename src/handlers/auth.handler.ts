@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
-import { user, query } from "../api/appwrite";
-import { generateApiKey, validateApiKey } from "../modules/key";
-import { db, clients } from "../db/index";
+import { user, query } from "../api/appwrite.js";
+import { generateApiKey, validateApiKey } from "../modules/key.js";
+import { db, clients } from "../db/index.js";
 
 export const createClient = async (req: Request, res: Response) => {
     try {

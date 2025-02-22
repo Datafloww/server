@@ -6,14 +6,18 @@
         "noImplicitAny": false,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outDir": "dist",
+        "outDir": "./dist",
+        "skipLibCheck": true,
         "declaration": true,
         "esModuleInterop": true,
-        "lib": ["esnext"]
+        "lib": ["esnext"],
+        "resolveJsonModule": true,
+        "allowSyntheticDefaultImports": true
     },
     "ts-node": {
         "esm": true,
         "experimentalSpecifierResolution": "node"
     },
-    "include": ["src/**/*.ts"]
+    "include": ["src/**/*.ts"],
+    "exclude": ["node_modules", "dist"]
 }
