@@ -2,8 +2,8 @@ import express from "express";
 import cors from "cors";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateWriteKey } from "./handlers/redis.js";
-import { authRouter } from "./routes/auth.router.js";
+import { validateWriteKey } from "./handlers/redis";
+import { authRouter } from "./routes/auth.router";
 
 const app = express();
 const __dirname = dirname(fileURLToPath(import.meta.url));

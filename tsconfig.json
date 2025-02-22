@@ -9,7 +9,7 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "declaration": true,
-        "esModuleInterop": true,
+        // "esModuleInterop": true,
         "lib": ["esnext"],
         "resolveJsonModule": true,
         "allowSyntheticDefaultImports": true

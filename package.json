@@ -4,10 +4,11 @@
     "main": "index.js",
     "type": "module",
     "scripts": {
-        "dev": "nodemon -e ts -w ./src -x npm run watch:serve",
-        "watch:serve": "node --loader ts-node/esm src/index.ts",
+        "dev": "nodemon -x tsx src/index.ts",
+        "clean": "shx rm -rf dist",
+        "tsc": "tsc -p .",
+        "build": "npm run clean && npm run tsc && fix-tsc-es-imports -y -V",
         "start": "node dist/index.js",
-        "build": "tsc -p .",
         "db:generate": "drizzle-kit generate --config drizzle.config.ts",
         "db:push": "drizzle-kit push",
         "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
@@ -23,9 +24,10 @@
         "@types/bcrypt": "^5.0.2",
         "@types/pg": "^8.11.11",
         "cors": "^2.8.5",
-        "drizzle-kit": "^0.19.1",
+        "drizzle-kit": "^0.30.4",
+        "fix-tsc-es-imports": "^0.1.6",
         "nodemon": "^3.1.7",
-        "ts-node": "^10.9.2",
+        "shx": "^0.3.4",
         "tsx": "^4.19.2",
         "typescript": "^5.5.4"
     },
@@ -38,7 +40,6 @@
         "dotenv": "^16.4.7",
         "drizzle-orm": "^0.39.3",
         "express": "^4.19.2",
-        "mysql2": "^3.12.0",
         "node-appwrite": "^14.1.0",
         "pg": "^8.13.3"
     }

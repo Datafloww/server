@@ -1,6 +1,6 @@
 import { pgTable, serial, text, jsonb, timestamp } from "drizzle-orm/pg-core";
 
-import { clients } from "./clients.js";
+import { clients } from "./clients";
 
 export const events = pgTable("events", {
     id: serial("id"),
