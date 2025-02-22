@@ -1,6 +1,6 @@
 import { randomBytes } from "crypto";
 import bcrypt from "bcrypt";
-import { db, apiKeys } from "../db";
+import { db, apiKeys } from "../db/index.js";
 import { eq } from "drizzle-orm";
 
 export async function generateApiKey(clientId: string) {
