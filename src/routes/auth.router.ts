@@ -1,5 +1,14 @@
 import { Router } from "express";
-import { checkIfUserExists } from "../handlers/user.handler.js";
+import {
+    checkIfUserExists,
+    createClient,
+    createApiKey,
+    verifyApiKey,
+} from "../handlers/auth.handler";
 export const authRouter = Router();
 
-authRouter.get("/check", checkIfUserExists);
+authRouter.get("/client/check", checkIfUserExists);
+authRouter.post("/client/create", createClient);
+
+authRouter.get("/key/create", createApiKey);
+authRouter.get("/key/verify", verifyApiKey);

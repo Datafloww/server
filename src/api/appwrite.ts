@@ -1,7 +1,5 @@
 import * as sdk from "node-appwrite";
-import dotenv from "dotenv";
-
-dotenv.config();
+import "dotenv/config";
 
 const client = new sdk.Client()
     .setProject(process.env.APPWRITE_PROJECT_ID)
