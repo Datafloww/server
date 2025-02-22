@@ -10,6 +10,10 @@
         {
             "src": "/(.*)",
             "dest": "src/index.ts"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "dist/index.js"
         }
     ]
 }
