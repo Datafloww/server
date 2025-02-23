@@ -4,7 +4,7 @@ import {
     createClient,
     createApiKey,
     verifyApiKey,
-} from "../handlers/auth.handler";
+} from "../handlers/auth.handler.js";
 export const authRouter = Router();
 
 authRouter.get("/client/check", checkIfUserExists);
