@@ -15,7 +15,7 @@ app.use(express.static("public"));
 app.use(cors());
 
 app.get("/", (req, res) => {
-    res.status(200).json({ message: "ok" });
+    res.redirect("/healthcheck");
 });
 
 app.use("/auth", authRouter);
