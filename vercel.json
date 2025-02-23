@@ -1,12 +1,10 @@
 {
     "version": 2,
+    "buildCommand": "npm run build",
     "builds": [
         {
             "src": "src/index.ts",
             "use": "@vercel/node"
-        },
-        {
-            "buildCommand": "npm run build"
         }
     ],
     "routes": [
