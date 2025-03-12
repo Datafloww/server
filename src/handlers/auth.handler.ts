@@ -1,14 +1,24 @@
 import { Request, Response } from "express";
 import { user, query } from "../api/appwrite.js";
 import { generateApiKey, validateApiKey } from "../modules/key.js";
-import { db, clients } from "../db/index.js";
+import { db, clients, apiKeys } from "../db/index.js";
+import { eq } from "drizzle-orm";
 
 export const createClient = async (req: Request, res: Response) => {
     try {
-        const response = await db.insert(clients).values({
-            clientId: req.body.id,
-            email: req.body.email,
-        });
+        await db
+            .insert(clients)
+            .values({
+                clientId: req.body.id,
+                email: req.body.email,
+            })
+            .then(() => {
+                db.insert(apiKeys).values({
+                    id: req.body.id,
+                    keyHash: "",
+                    keyId: "",
+                });
+            });
         res.status(201).json({
             message: "ok",
         });
@@ -39,15 +49,20 @@ export const checkIfUserExists = async (req: Request, res: Response) => {
 
 export const createApiKey = async (req: Request, res: Response) => {
     try {
-        const response = await user.list([
-            query.equal("email", req.body.email as string),
-        ]);
+        const response = await db
+            .select({ email: clients.email, cid: clients.clientId })
+            .from(clients)
+            .where(eq(clients.email, req.body.email as string));
 
-        if (response.total === 0) {
+        const user = response[0];
+
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        const clientId = response.users[0].$id;
-        const apiKey = await generateApiKey(clientId);
+
+        const { cid } = user;
+
+        const apiKey = await generateApiKey(cid);
         res.status(201).json({
             apiKey,
         });
@@ -60,25 +75,48 @@ export const createApiKey = async (req: Request, res: Response) => {
 
 export const verifyApiKey = async (req: Request, res: Response) => {
     try {
-        const response = await user.list([
-            query.equal("email", req.body.email as string),
-        ]);
-        if (response.total === 0) {
+        const source = Array.isArray(req.headers["x-analytics-source"])
+            ? req.headers["x-analytics-source"][0].toLowerCase()
+            : req.headers["x-analytics-source"]?.toLowerCase();
+        if (source === "package") {
+            const isValid = await validateApiKey(
+                req.body.apiKey as string,
+                null
+            );
+            if (!isValid) {
+                return res.status(401).json({ message: "Invalid API Key" });
+            }
+            return res
+                .cookie("auth", req.body.apiKey as string, {
+                    maxAge: 900000,
+                    httpOnly: true,
+                })
+                .status(200)
+                .json({ message: "ok" });
+        }
+
+        const response = await db
+            .select({ email: clients.email, cid: clients.clientId })
+            .from(clients)
+            .where(eq(clients.email, req.body.email));
+
+        const user = response[0];
+
+        if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-        const clientId = response.users[0].$id;
-        const isValid = await validateApiKey(
-            clientId,
-            req.body.apiKey as string
-        );
+
+        const { cid } = user;
+
+        const isValid = await validateApiKey(req.body.apiKey as string, cid);
         if (!isValid) {
-            return res.status(401).json({ message: "Unauthorized" });
+            return res.status(401).json({ message: "Invalid API Key" });
         }
-        res.status(200).json({
-            message: "ok",
-        });
+
+        return res.status(200).json({ message: "ok" });
     } catch (error: any) {
-        res.status(error.code || 500).json({
+        console.error("Verification error:", error);
+        return res.status(error.code || 500).json({
             message: error.response?.message || "Server error",
         });
     }

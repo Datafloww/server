@@ -1,51 +1,31 @@
 import express from "express";
 import cors from "cors";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { validateWriteKey } from "./handlers/redis.js";
+import "dotenv/config";
 import { authRouter } from "./routes/auth.router.js";
+import { analyticsRouter } from "./routes/analytics.router.js";
+import { TransformPayload } from "./middlewares/analytics.middleware.js";
+import { IngestEvent } from "./handlers/analytics.handler.js";
+
+const TOKEN = process.env.HEADER_AUTH_TOKEN;
 
 const app = express();
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const parentDir = resolve(__dirname, "..");
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cors());
 
+app.use("/auth", authRouter);
+app.use("/analytics", analyticsRouter);
+
 app.get("/", (req, res) => {
+    if (req.headers.authorization !== `Bearer ${TOKEN}`) {
+        return res.status(403).send("Forbidden");
+    }
     res.redirect("/healthcheck");
 });
 
-app.use("/auth", authRouter);
-
-app.get("/analytics/v1/:key/analytics.min.js", async (req, res) => {
-    try {
-        if (typeof req.query.userId !== "string") {
-            return res.status(400).json({ error: "Invalid userId" });
-        }
-
-        const userId = req.query.userId;
-        const key = req.params.key;
-
-        if (!key || !userId) {
-            console.error("Invalid key or userId provided");
-            return false;
-        }
-        const filePath = join(parentDir, "public/analytics.min.js");
-        const isValid = await validateWriteKey(req.params.key, userId);
-
-        if (!isValid) {
-            return res.status(404).json({ message: "Invalid write key" });
-        }
-
-        res.status(200).sendFile(filePath);
-    } catch (error) {
-        console.error("Error in route handler:", error);
-        res.status(500).json({ message: "Something went wrong" });
-    }
-});
+app.post("/", TransformPayload(), IngestEvent);
 
 app.get("/healthcheck", (req, res) => {
     const health = {

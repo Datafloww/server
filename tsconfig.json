@@ -9,6 +9,7 @@
         "outDir": "./dist",
         "skipLibCheck": true,
         "declaration": true,
+        "strict": true,
         // "esModuleInterop": true,
         "lib": ["esnext"],
         "resolveJsonModule": true,

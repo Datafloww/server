@@ -11,4 +11,4 @@ authRouter.get("/client/check", checkIfUserExists);
 authRouter.post("/client/create", createClient);
 
 authRouter.get("/key/create", createApiKey);
-authRouter.get("/key/verify", verifyApiKey);
+authRouter.post("/key/verify", verifyApiKey);

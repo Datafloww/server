@@ -104,6 +104,8 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+.env.test
+a.js
 
 # parcel-bundler cache (https://parceljs.org/)
 
@@ -172,5 +174,7 @@ dist
 
 # Finder (MacOS) folder config
 .DS_Store
-
+*.html
+*.sql
+events.json
 .vercel
