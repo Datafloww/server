@@ -5,6 +5,7 @@ import { authRouter } from "./routes/auth.router.js";
 import { analyticsRouter } from "./routes/analytics.router.js";
 import { TransformPayload } from "./middlewares/analytics.middleware.js";
 import { IngestEvent } from "./handlers/analytics.handler.js";
+import { BearerAuth } from "./middlewares/auth.middleware.js";
 
 const TOKEN = process.env.HEADER_AUTH_TOKEN;
 
@@ -15,17 +16,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
 app.use(cors());
 
+app.use(BearerAuth);
+
 app.use("/auth", authRouter);
 app.use("/analytics", analyticsRouter);
 
 app.get("/", (req, res) => {
-    if (req.headers.authorization !== `Bearer ${TOKEN}`) {
-        return res.status(403).send("Forbidden");
-    }
     res.redirect("/healthcheck");
 });
-
-app.post("/", TransformPayload(), IngestEvent);
 
 app.get("/healthcheck", (req, res) => {
     const health = {
@@ -38,13 +36,29 @@ app.get("/healthcheck", (req, res) => {
 });
 
 app.use((err, req, res, next) => {
-    if (err.type === "auth") {
-        res.status(401).json({ message: "unauthorized" });
-    } else if (err.type === "input") {
-        res.status(400).json({ message: "invalid input" });
-    } else {
-        res.status(500).json({ message: err, stack: err.stack });
+    console.error("Error:", err);
+
+    if (err.type === "input") {
+        return res.status(400).json({
+            success: false,
+            error: "Invalid input",
+            details: err.message || "The input provided is not valid.",
+        });
     }
+
+    // Handle other types of errors
+    const statusCode = err.status || 500;
+    const response: { success: boolean; error: any; stack?: string } = {
+        success: false,
+        error: err.message || "Internal Server Error",
+    };
+
+    // Include stack trace only in non-production environments
+    if (process.env.NODE_ENV !== "production") {
+        response.stack = err.stack;
+    }
+
+    res.status(statusCode).json(response);
 });
 
 export default app;

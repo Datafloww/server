@@ -8,7 +8,7 @@ export const TransformPayload = () => {
                 event: payload.type === "identify" ? "Identify" : payload.event,
                 type: payload.type === "trackEnd" ? "track" : payload.type,
                 writeKey: req.body.writeKey,
-                sessionId: payload.sessionId || crypto.randomUUID(), //TODO: add session in loclstorage, in package,
+                sessionId: payload.sessionId,
                 userId: payload.userId || null,
                 anonId: payload.anonymousId,
                 properties: {

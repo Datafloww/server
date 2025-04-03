@@ -26,17 +26,20 @@ global.dbPool = pool;
 global.testDb = drizzle(pool);
 
 // Run migrations before tests begin
-beforeAll(async () => {
-    // Adjust the path to your migrations folder
-    const migrationsFolder = path.join(__dirname, "drizzle");
-    try {
-        await migrate(global.testDb, { migrationsFolder });
-        console.log("Migrations completed for test database");
-    } catch (err) {
-        console.error("Migration failed:", err);
-        throw err;
-    }
-});
+// beforeAll(async () => {
+//     // Adjust the path to your migrations folder
+//     const migrationsFolder = path.join(
+//         path.dirname(new URL(import.meta.url).pathname),
+//         "drizzle"
+//     );
+//     try {
+//         await migrate(global.testDb, { migrationsFolder });
+//         console.log("Migrations completed for test database");
+//     } catch (err) {
+//         console.error("Migration failed:", err);
+//         throw err;
+//     }
+// });
 
 // Close pool after all tests
 afterAll(async () => {

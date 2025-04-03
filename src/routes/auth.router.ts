@@ -4,6 +4,7 @@ import {
     createClient,
     createApiKey,
     verifyApiKey,
+    getApiKey,
 } from "../handlers/auth.handler.js";
 export const authRouter = Router();
 
@@ -12,3 +13,4 @@ authRouter.post("/client/create", createClient);
 
 authRouter.get("/key/create", createApiKey);
 authRouter.post("/key/verify", verifyApiKey);
+authRouter.get("/key/get", getApiKey);

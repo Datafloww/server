@@ -12,6 +12,7 @@ export const apiKeys = pgTable("api_keys", {
         .references(() => clients.clientId, {
             onDelete: "cascade",
         }),
+    key: text("key").unique().notNull(),
     keyId: text("key_id").notNull().unique(),
     keyHash: text("key_hash").notNull(),
     createdAt: timestamp("created_at").$onUpdate(() => new Date()),

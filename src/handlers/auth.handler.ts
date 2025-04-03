@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
 import { user, query } from "../api/appwrite.js";
-import { generateApiKey, validateApiKey } from "../modules/key.js";
+import {
+    generateApiKey,
+    validateApiKey,
+    getApiKeyFromId,
+} from "../modules/key.js";
 import { db, clients, apiKeys } from "../db/index.js";
 import { eq } from "drizzle-orm";
 
@@ -17,6 +21,7 @@ export const createClient = async (req: Request, res: Response) => {
                     id: req.body.id,
                     keyHash: "",
                     keyId: "",
+                    key: "",
                 });
             });
         res.status(201).json({
@@ -120,4 +125,13 @@ export const verifyApiKey = async (req: Request, res: Response) => {
             message: error.response?.message || "Server error",
         });
     }
+};
+
+export const getApiKey = async (req: Request, res: Response) => {
+    const cid = req.query.client_id as string | undefined;
+    if (!cid) {
+        return res.status(400).json({ message: "client_id required" });
+    }
+    const key = await getApiKeyFromId(cid);
+    return res.status(200).json({ data: key });
 };

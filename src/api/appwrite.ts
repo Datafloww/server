@@ -7,3 +7,4 @@ const client = new sdk.Client()
 export const account = new sdk.Account(client);
 export const user = new sdk.Users(client);
 export const query = sdk.Query;
+export const functions = new sdk.Functions(client);

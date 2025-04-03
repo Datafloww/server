@@ -37,4 +37,3 @@ analyticsRouter.post("/track", TransformPayload(), (req, res) => {
         res.status(200).json({ success: true, eventId: res.locals.eventId });
     });
 });
-//TODO: store events in databasiaie
