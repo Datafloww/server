@@ -7,7 +7,7 @@ import {
     InsertEvent,
     InsertSession,
     InsertUser,
-} from "../db/schema/analytics";
+} from "../db/schema/analytics.js";
 import { eq } from "drizzle-orm";
 import { getClientIp } from "../services/geolocation.js";
 import { getClientFromKey } from "../modules/key.js";
