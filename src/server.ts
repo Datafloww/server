@@ -3,8 +3,6 @@ import cors from "cors";
 import "dotenv/config";
 import { authRouter } from "./routes/auth.router.js";
 import { analyticsRouter } from "./routes/analytics.router.js";
-import { TransformPayload } from "./middlewares/analytics.middleware.js";
-import { IngestEvent } from "./handlers/analytics.handler.js";
 import { BearerAuth } from "./middlewares/auth.middleware.js";
 
 const TOKEN = process.env.HEADER_AUTH_TOKEN;

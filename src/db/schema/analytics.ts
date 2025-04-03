@@ -9,7 +9,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { InferInsertModel } from "drizzle-orm";
 
-import { clients } from "./clients";
+import { clients } from "./clients.js";
 
 export const users = pgTable("users", {
     id: serial("id").primaryKey(),

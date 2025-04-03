@@ -9,8 +9,8 @@ import {
     InsertUser,
 } from "../db/schema/analytics";
 import { eq } from "drizzle-orm";
-import { getClientIp } from "../services/geolocation";
-import { getClientFromKey } from "../modules/key";
+import { getClientIp } from "../services/geolocation.js";
+import { getClientFromKey } from "../modules/key.js";
 
 /**
  * Helper function to ensure a user exists in the database
