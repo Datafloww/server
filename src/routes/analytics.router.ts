@@ -5,6 +5,15 @@ import { fileURLToPath } from "node:url";
 import { IngestEvent } from "../handlers/analytics.handler.js";
 import { TransformPayload } from "../middlewares/analytics.middleware.js";
 
+import {
+    getOverviewMetrics,
+    getTopPages,
+    getUserBehavior,
+    getRetentionMetrics,
+    getBusinessMetrics
+} from "../handlers/metrics.handler.js";
+
+
 export const analyticsRouter = Router();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -37,3 +46,10 @@ analyticsRouter.post("/track", TransformPayload(), (req, res) => {
         res.status(200).json({ success: true, eventId: res.locals.eventId });
     });
 });
+
+
+analyticsRouter.get("/overview", getOverviewMetrics);
+analyticsRouter.get("/top-pages", getTopPages);
+analyticsRouter.get("/user-behavior", getUserBehavior);
+analyticsRouter.get("/retention", getRetentionMetrics);
+analyticsRouter.get("/business", getBusinessMetrics);
