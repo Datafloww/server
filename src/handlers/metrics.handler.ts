@@ -4,20 +4,19 @@ import { events, sessions, users } from "../db/schema/analytics.js";
 import { and, eq, sql, desc, gte, lte } from "drizzle-orm";
 import { getClientFromKey } from "../modules/key.js";
 import { validateApiKey } from "../modules/key.js";
-import * as metricsCalculations from '../utils/metricsCalculations';
+import * as metricsCalculations from "../utils/metricsCalculations.js";
 import { jsonb } from "drizzle-orm/pg-core";
-
 
 // Helper to format date to SQL timestamp string
 function formatDate(date: Date): string {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
-    
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+    const milliseconds = String(date.getMilliseconds()).padStart(3, "0");
+
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
 }
 
@@ -32,17 +31,17 @@ interface TimeRange {
 function getTimeRange(start?: string, end?: string): TimeRange {
     const endDate = end ? new Date(end) : new Date();
     endDate.setHours(23, 59, 59, 999); // Set to end of day
-    
+
     const startDate = start
         ? new Date(start)
         : new Date(endDate.getTime() - 30 * 24 * 60 * 60 * 1000); // Default 30 days
     startDate.setHours(0, 0, 0, 0); // Set to start of day
-    
+
     return {
         startDate,
         endDate,
         formattedStart: formatDate(startDate),
-        formattedEnd: formatDate(endDate)
+        formattedEnd: formatDate(endDate),
     };
 }
 
@@ -113,7 +112,8 @@ export const getOverviewMetrics = async (req: Request, res: Response) => {
             pageViews: pageViews[0].total || 0,
             avgSessionDuration: Math.round(avgDuration[0].avg || 0),
             timeRange: {
-                start: getTimeRange(start as string, end as string).formattedStart,
+                start: getTimeRange(start as string, end as string)
+                    .formattedStart,
                 end: getTimeRange(start as string, end as string).formattedEnd,
             },
         });
@@ -173,7 +173,10 @@ export const getUserBehavior = async (req: Request, res: Response) => {
             return res.status(401).json({ error: "Invalid API key" });
         }
 
-        const { startDate, endDate } = getTimeRange(start as string, end as string);
+        const { startDate, endDate } = getTimeRange(
+            start as string,
+            end as string
+        );
 
         // Get device distribution from events table
         const deviceDistribution = await db
@@ -226,8 +229,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     gte(sessions.firstSeen, startDate),
                     lte(sessions.firstSeen, endDate)
                 )
-            )
-            .groupBy(sql`
+            ).groupBy(sql`
                 CASE 
                     WHEN interactions >= 10 THEN 'High'
                     WHEN interactions >= 5 THEN 'Medium'
@@ -257,8 +259,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     gte(sessions.firstSeen, startDate),
                     lte(sessions.firstSeen, endDate)
                 )
-            )
-            .groupBy(sql`
+            ).groupBy(sql`
                 CASE 
                     WHEN duration < 60 THEN '0-1 min'
                     WHEN duration < 300 THEN '1-5 min'
@@ -289,8 +290,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     gte(sessions.firstSeen, startDate),
                     lte(sessions.firstSeen, endDate)
                 )
-            )
-            .groupBy(sql`
+            ).groupBy(sql`
                 CASE 
                     WHEN referrer IS NULL OR referrer = '' THEN 'Direct'
                     WHEN referrer LIKE '%google%' THEN 'Google'
@@ -359,8 +359,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     gte(sessions.firstSeen, startDate),
                     lte(sessions.firstSeen, endDate)
                 )
-            )
-            .groupBy(sql`
+            ).groupBy(sql`
                 CASE 
                     WHEN interactions = 0 THEN 'No interactions'
                     WHEN interactions = 1 THEN 'Single interaction'
@@ -370,9 +369,9 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     ELSE 'More than 10 interactions'
                 END
             `);
-        
+
         // Entry Page Analysis
-        
+
         const entryPageAnalysis = await db
             .select({
                 page: sessions.entryPage,
@@ -423,7 +422,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                 city: sql<string>`(properties->'geo'->>'city')::text`,
                 count: sql<number>`count(*)`,
                 avgLatitude: sql<number>`avg((properties->'geo'->>'latitude')::numeric)`,
-                avgLongitude: sql<number>`avg((properties->'geo'->>'longitude')::numeric)`
+                avgLongitude: sql<number>`avg((properties->'geo'->>'longitude')::numeric)`,
             })
             .from(events)
             .where(
@@ -433,7 +432,10 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                     lte(events.createdAt, endDate)
                 )
             )
-            .groupBy(sql`(properties->'geo'->>'country')::text`, sql`(properties->'geo'->>'city')::text`)
+            .groupBy(
+                sql`(properties->'geo'->>'country')::text`,
+                sql`(properties->'geo'->>'city')::text`
+            )
             .orderBy(sql`count(*) DESC`)
             .limit(10);
 
@@ -443,7 +445,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
                 effectiveType: sql<string>`(properties->'connection'->>'effectiveType')::text`,
                 count: sql<number>`count(*)`,
                 avgRtt: sql<number>`avg((properties->'connection'->>'rtt')::numeric)`,
-                avgDownlink: sql<number>`avg((properties->'connection'->>'downlink')::numeric)`
+                avgDownlink: sql<number>`avg((properties->'connection'->>'downlink')::numeric)`,
             })
             .from(events)
             .where(
@@ -460,7 +462,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
         const screenSizeAnalysis = await db
             .select({
                 screenSize: sql<string>`(properties->>'screenSize')::text`,
-                count: sql<number>`count(*)`
+                count: sql<number>`count(*)`,
             })
             .from(events)
             .where(
@@ -478,7 +480,7 @@ export const getUserBehavior = async (req: Request, res: Response) => {
         const languageAnalysis = await db
             .select({
                 language: sql<string>`(properties->>'language')::text`,
-                count: sql<number>`count(*)`
+                count: sql<number>`count(*)`,
             })
             .from(events)
             .where(
@@ -507,7 +509,8 @@ export const getUserBehavior = async (req: Request, res: Response) => {
             screenSizeAnalysis,
             languageAnalysis,
             timeRange: {
-                start: getTimeRange(start as string, end as string).formattedStart,
+                start: getTimeRange(start as string, end as string)
+                    .formattedStart,
                 end: getTimeRange(start as string, end as string).formattedEnd,
             },
         });
@@ -564,7 +567,8 @@ export const getRetentionMetrics = async (req: Request, res: Response) => {
         return res.json({
             returnRate,
             timeRange: {
-                start: getTimeRange(start as string, end as string).formattedStart,
+                start: getTimeRange(start as string, end as string)
+                    .formattedStart,
                 end: getTimeRange(start as string, end as string).formattedEnd,
             },
         });
@@ -579,24 +583,26 @@ export const getRetentionMetrics = async (req: Request, res: Response) => {
 export async function getBusinessMetrics(req: Request, res: Response) {
     try {
         const { start, end, businessType } = req.query;
-        
+
         if (!start || !end || !businessType) {
-            return res.status(400).json({ error: 'Missing required parameters' });
+            return res
+                .status(400)
+                .json({ error: "Missing required parameters" });
         }
 
-        const apiKey = req.headers['x-api-key'] as string;
+        const apiKey = req.headers["x-api-key"] as string;
         if (!apiKey) {
-            return res.status(401).json({ error: 'API key is required' });
+            return res.status(401).json({ error: "API key is required" });
         }
 
         const clientId = await getClientFromKey(apiKey);
         if (!clientId) {
-            return res.status(401).json({ error: 'Invalid API key' });
+            return res.status(401).json({ error: "Invalid API key" });
         }
 
         const isValid = await validateApiKey(apiKey, clientId);
         if (!isValid) {
-            return res.status(401).json({ error: 'Invalid API key' });
+            return res.status(401).json({ error: "Invalid API key" });
         }
 
         const { startDate, endDate } = getTimeRange(
@@ -609,7 +615,7 @@ export async function getBusinessMetrics(req: Request, res: Response) {
             .select({
                 eventType: events.eventType,
                 count: sql<number>`count(*)`,
-                properties: sql<typeof jsonb>`jsonb_agg(properties)`
+                properties: sql<typeof jsonb>`jsonb_agg(properties)`,
             })
             .from(events)
             .where(
@@ -623,43 +629,71 @@ export async function getBusinessMetrics(req: Request, res: Response) {
 
         // Get common metrics
         const commonMetrics = {
-            totalSessions: await metricsCalculations. getTotalSessions(clientId, start as string, end as string),
-            uniqueVisitors: await metricsCalculations.getUniqueVisitors(clientId, start as string, end as string),
-            averageSessionDuration: await metricsCalculations.getAverageSessionDuration(clientId, start as string, end as string),
-            bounceRate: await metricsCalculations.getBounceRate(clientId, start as string, end as string)
+            totalSessions: await metricsCalculations.getTotalSessions(
+                clientId,
+                start as string,
+                end as string
+            ),
+            uniqueVisitors: await metricsCalculations.getUniqueVisitors(
+                clientId,
+                start as string,
+                end as string
+            ),
+            averageSessionDuration:
+                await metricsCalculations.getAverageSessionDuration(
+                    clientId,
+                    start as string,
+                    end as string
+                ),
+            bounceRate: await metricsCalculations.getBounceRate(
+                clientId,
+                start as string,
+                end as string
+            ),
         };
 
         // Get business-specific metrics
         let businessMetrics = {};
         switch (businessType) {
-            case 'ecommerce':
+            case "ecommerce":
                 businessMetrics = {
                     topProducts: metricsCalculations.getTopProducts(metrics),
-                    salesByCategory: metricsCalculations.getSalesByCategory(metrics),
-                    purchaseFunnel: metricsCalculations.analyzePurchaseFunnel(metrics)
+                    salesByCategory:
+                        metricsCalculations.getSalesByCategory(metrics),
+                    purchaseFunnel:
+                        metricsCalculations.analyzePurchaseFunnel(metrics),
                 };
                 break;
-            case 'blog':
+            case "blog":
                 businessMetrics = {
-                    averageReadTime: metricsCalculations.calculateAverageReadTime(metrics),
-                    popularArticles: metricsCalculations.getPopularArticles(metrics),
-                    engagementRate: metricsCalculations.calculateEngagementRate(metrics)
+                    averageReadTime:
+                        metricsCalculations.calculateAverageReadTime(metrics),
+                    popularArticles:
+                        metricsCalculations.getPopularArticles(metrics),
+                    engagementRate:
+                        metricsCalculations.calculateEngagementRate(metrics),
                 };
                 break;
-            case 'saas':
+            case "saas":
                 businessMetrics = {
-                    userRetention: metricsCalculations.calculateUserRetention(metrics),
-                    featureAdoption: metricsCalculations.analyzeFeatureAdoption(metrics),
+                    userRetention:
+                        metricsCalculations.calculateUserRetention(metrics),
+                    featureAdoption:
+                        metricsCalculations.analyzeFeatureAdoption(metrics),
                     churnRate: metricsCalculations.calculateChurnRate(metrics),
-                    mrr: metricsCalculations.calculateMonthlyRecurringRevenue(metrics),
-                    activeUsers: metricsCalculations.getActiveUsers(metrics)
+                    mrr: metricsCalculations.calculateMonthlyRecurringRevenue(
+                        metrics
+                    ),
+                    activeUsers: metricsCalculations.getActiveUsers(metrics),
                 };
                 break;
             default:
                 businessMetrics = {
-                    eventDistribution: metricsCalculations.getEventDistribution(metrics),
-                    userJourneys: metricsCalculations.analyzeUserJourney(metrics),
-                    customEvents: metricsCalculations.getCustomEvents(metrics)
+                    eventDistribution:
+                        metricsCalculations.getEventDistribution(metrics),
+                    userJourneys:
+                        metricsCalculations.analyzeUserJourney(metrics),
+                    customEvents: metricsCalculations.getCustomEvents(metrics),
                 };
         }
 
@@ -667,12 +701,11 @@ export async function getBusinessMetrics(req: Request, res: Response) {
             timeRange: { start, end },
             businessType,
             commonMetrics,
-            businessMetrics
+            businessMetrics,
         });
-
     } catch (error) {
-        console.error('Error fetching business metrics:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        console.error("Error fetching business metrics:", error);
+        res.status(500).json({ error: "Internal server error" });
     }
 }
 
