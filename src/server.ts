@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import cors_config from "./utils/cors.config.js";
 import "dotenv/config";
 import { authRouter } from "./routes/auth.router.js";
 import { analyticsRouter } from "./routes/analytics.router.js";
@@ -12,7 +13,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
-app.use(cors());
+app.use(cors(cors_config));
 
 app.use(BearerAuth);
 
