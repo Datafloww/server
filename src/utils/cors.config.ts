@@ -6,11 +6,8 @@ const allowedOrigins = [
 ];
 
 const cors_config: CorsOptions = {
-    origin: (origin, req, callback) => {
-        // @ts-ignore
-        if (req && req.allowAllOrigins) {
-            callback(null, true);
-        } else if (!origin || allowedOrigins.includes(origin)) {
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
         } else {
             callback(new Error("Not allowed by CORS"));
