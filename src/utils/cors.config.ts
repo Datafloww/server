@@ -1,18 +1,9 @@
 import { CorsOptions } from "cors";
 
-const allowedOrigins = [
-    "https://dash.datafloww.me",
-    "http://dash.datafloww.me",
-];
+// const allowedOrigins = ["*"];
 
 const cors_config: CorsOptions = {
-    origin: (origin, callback) => {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    },
+    origin: true,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
 };
