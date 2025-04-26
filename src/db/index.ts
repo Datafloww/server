@@ -4,13 +4,11 @@ import { Pool } from "pg";
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false,
-    },
+    max: 1, // Limit connections for Lambda
+    idleTimeoutMillis: 0, // Disable idle timeout
 });
-export const db = drizzle(pool, {
-    logger: true,
-});
+
+export const db = drizzle(pool);
 
 export { clients, apiKeys } from "./schema/clients.js";
 export { events, sessions } from "./schema/analytics.js";
