@@ -5,6 +5,7 @@ import "dotenv/config";
 import { authRouter } from "./routes/auth.router.js";
 import { analyticsRouter } from "./routes/analytics.router.js";
 import { BearerAuth } from "./middlewares/auth.middleware.js";
+import { corsPathExempt } from "./middlewares/cors-path-exempt.middleware.js";
 
 const TOKEN = process.env.HEADER_AUTH_TOKEN;
 
@@ -13,6 +14,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("public"));
+app.use(corsPathExempt);
 app.use(cors(cors_config));
 
 app.use(BearerAuth);
