@@ -1,14 +1,12 @@
-import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+// src/db.ts
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
+import { config } from "dotenv";
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 1, // Limit connections for Lambda
-    idleTimeoutMillis: 0, // Disable idle timeout
-});
+config({ path: ".env" });
 
-export const db = drizzle(pool);
+const sql = neon(process.env.DATABASE_URL!);
+export const db = drizzle({ client: sql });
 
 export { clients, apiKeys } from "./schema/clients.js";
 export { events, sessions } from "./schema/analytics.js";
